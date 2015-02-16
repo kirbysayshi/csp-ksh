@@ -16,7 +16,7 @@ Then I also read:
 Examples
 --------
 
-See [tests.js](./tests.js). Otherwise here's an example of finding the mouse vector:
+See [test.js](./test.js). Otherwise here's an example of finding the mouse vector:
 
 ```js
 var csp = require('./');
