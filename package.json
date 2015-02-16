@@ -1,0 +1,29 @@
+{
+  "name": "csp-ksh",
+  "version": "0.1.0",
+  "description": "Playing with CSP without generators",
+  "main": "index.js",
+  "scripts": {
+    "test": "tape test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kirbysayshi/csp-ksh"
+  },
+  "keywords": [
+    "csp",
+    "async"
+  ],
+  "author": "Drew Petersen <senofpeter@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kirbysayshi/csp-ksh/issues"
+  },
+  "homepage": "https://github.com/kirbysayshi/csp-ksh",
+  "devDependencies": {
+    "tape": "^3.5.0"
+  },
+  "dependencies": {
+    "debug": "^2.1.1"
+  }
+}
