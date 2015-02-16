@@ -19,10 +19,10 @@ function kick(ch) {
     && (ch.consumers.length || ch.producers.length)
   ) {
     debug('ch:'+ch.id, 'kick:run-queued',
-    	'buf', ch.buf.length,
+      'buf', ch.buf.length,
       'consumers', ch.consumers.length,
       'producers', ch.producers.length);
-  	ch.kicked = setTimeout(run.bind(null, ch));
+    ch.kicked = setTimeout(run.bind(null, ch));
   }
 }
 
@@ -114,14 +114,14 @@ chan.CLOSED = new (function CLOSED() {});
 // Close the channel. A closed channel cannot be PUT'ed to, but TAKEs will
 // receive the chan.CLOSED value.
 function close(ch) {
-	ch.closed = true;
+  ch.closed = true;
   kick(ch);
 }
 
 function put(ch, val, cb) {
 
   if (ch.closed) {
-  	throw new Error('Cannot PUT on a closed channel');
+    throw new Error('Cannot PUT on a closed channel');
   }
 
   if (!tryput()) {
@@ -131,7 +131,7 @@ function put(ch, val, cb) {
 
   function tryput() {
     debug('ch:'+ch.id, 'tryput', ch.type);
-	  if (ch.type == 'FIXED') {
+    if (ch.type == 'FIXED') {
       if (ch.buf.length < ch.window) {
         transduce();
         kick(ch);
@@ -152,7 +152,7 @@ function put(ch, val, cb) {
     }
     if (ch.type == 'SLIDING') {
       if (ch.buf.length == ch.window) {
-				ch.buf.shift();
+        ch.buf.shift();
       }
       transduce();
       kick(ch);
@@ -172,12 +172,12 @@ function put(ch, val, cb) {
 }
 
 function take(ch, cb) {
-	ch.consumers.push(trytake);
+  ch.consumers.push(trytake);
   kick(ch);
 
   function trytake() {
     if (ch.buf.length > 0) {
-    	return cb(ch.buf.shift());
+      return cb(ch.buf.shift());
     } else if (ch.closed) {
       return cb(chan.CLOSED);
     } else {

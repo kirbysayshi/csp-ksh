@@ -7,9 +7,9 @@ var take = csp.take;
 var close = csp.close;
 
 test('single put', function(t) {
-	var ch = chan();
+  var ch = chan();
   put(ch, 5, function() {
-  	t.pass('put 5')
+    t.pass('put 5')
   });
   take(ch, function(val) {
     t.equal(val, 5, 'take 5');
@@ -47,7 +47,7 @@ test('sliding', function(t) {
   })
 })
 
-test('single transducer is ok', function(t) {
+test('single mapper is ok', function(t) {
   var ch = chan(2, function(v) {
     return v + 1;
   });
@@ -70,20 +70,20 @@ test('single transducer is ok', function(t) {
   })
 })
 
-test('transducers return undefined to filter', function(t) {
+test('mappers return undefined to filter', function(t) {
   var ch = chan(1, [function(val) {
-  	return val + 1;
+    return val + 1;
   }, function filterEven(val) {
     return val % 2 === 0
-    	? val
-    	: undefined;
+      ? val
+      : undefined;
   }]);
 
   // PUTs are buffered internally, so even though a buffer size of 1 is
   // specified above, these will all eventually successfully PUT. They are
   // buffered because the semantics are that they "block", but JS can't really
   // do that without generators...
-	put(ch, 1, function() {
+  put(ch, 1, function() {
     put(ch, 2, function() {
       put(ch, 3, function() {
         put(ch, 4, function() {
