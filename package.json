@@ -1,6 +1,6 @@
 {
   "name": "csp-ksh",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Playing with CSP without generators",
   "main": "index.js",
   "scripts": {
