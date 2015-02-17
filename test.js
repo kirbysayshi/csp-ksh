@@ -203,7 +203,7 @@ test('transducers: drop (stateful reduction)', function(t) {
   })
 })
 
-test.only('transducers: take as array, ', function(t) {
+test('transducers: take as array, ', function(t) {
   var ch = chan(1, td.comp(td.take(3), td.partitionAll(3)));
 
   put(ch, 0)
