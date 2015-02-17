@@ -1,4 +1,5 @@
 var test = require('tape');
+var td = require('transducers-js');
 
 var csp = require('./');
 var chan = csp.chan;

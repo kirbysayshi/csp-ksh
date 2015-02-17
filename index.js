@@ -72,7 +72,7 @@ function run(ch) {
 //   -> 3 values, new replace old, discard odd values
 // chan(['SLIDING', 3], [function(f) { return f % 2 === 0 ? f : undefined }), function(f) { return f *2 }]
 //   -> 3 values, new replace old, discard odd values, square evens
-function chan(type, transducers) {
+function chan(type, transducer) {
   var btype, bwin;
 
   if (Array.isArray(type)) {
@@ -86,12 +86,6 @@ function chan(type, transducers) {
     bwin = type || 1;
   }
 
-  transducers = transducers
-    ? Array.isArray(transducers)
-      ? transducers
-      : [transducers]
-    : [function(f) { return f; }]
-
   return {
     id: ++chan._id,
     type: btype,
@@ -101,7 +95,7 @@ function chan(type, transducers) {
     consumers: [],
     producers: [],
     kicked: null,
-    transducer: transducers || [function(f) { return f; }],
+    transducer: transducer ? transducer(new Xform) : new Xform,
   }
 }
 
@@ -127,6 +121,9 @@ function put(ch, val, cb) {
   if (!tryput()) {
     ch.producers.push(tryput);
     kick(ch);
+    return false;
+  } else {
+    return true;
   }
 
   function tryput() {
@@ -162,12 +159,7 @@ function put(ch, val, cb) {
   }
 
   function transduce() {
-    var tval = val;
-    for (var i = 0; i < ch.transducer.length; i++) {
-      tval = ch.transducer[i](tval);
-      if (tval == undefined) return;
-    }
-    ch.buf.push(tval);
+    ch.transducer.step(ch.buf, val);
   }
 }
 
@@ -185,4 +177,16 @@ function take(ch, cb) {
       kick(ch);
     }
   }
+}
+
+function Xform(){}
+
+Xform.prototype.init = function() {}
+
+Xform.prototype.result = function(result) {
+  return result;
+}
+
+Xform.prototype.step = function(result, input) {
+  return result.push(input);
 }
