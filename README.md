@@ -25,6 +25,8 @@ Examples
 
 See [test.js](./test.js). Otherwise here's an example of finding the mouse vector:
 
+[![view on requirebin](http://requirebin.com/badge.png)](http://requirebin.com/?gist=d140e4751c621e58a8d4)
+
 ```js
 var td = require('transducers-js');
 var csp = require('./');
