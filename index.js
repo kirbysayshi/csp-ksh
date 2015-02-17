@@ -67,16 +67,12 @@ function run(ch) {
 //   -> 1 value, Type == FIXED ("blocking")
 // chan(2)
 //   -> 2 values, Type == FIXED
-// chan(2, function(f) { return f })
-//   -> 2 values, Type == FIXED, with transform
-// chan(['DROPPING', 3])
-//   -> 3 values, others will be dropped
-// chan(['SLIDING', 3])
+// chan([exports.FIXED], 2)
+//   -> equivalent to above
+// chan([exports.DROPPING, 3])
+//   -> 3 values, others will be dropped unless takes occur
+// chan([exports.SLIDING, 3])
 //   -> 3 values, new replace old
-// chan(['SLIDING', 3], function(f) { return f % 2 === 0 ? f : undefined })
-//   -> 3 values, new replace old, discard odd values
-// chan(['SLIDING', 3], [function(f) { return f % 2 === 0 ? f : undefined }), function(f) { return f *2 }]
-//   -> 3 values, new replace old, discard odd values, square evens
 function chan(type, transducer) {
   var btype, bwin;
 
