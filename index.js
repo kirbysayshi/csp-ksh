@@ -9,7 +9,6 @@ exports.FIXED = 'FIXED';
 exports.SLIDING = 'SLIDING';
 exports.DROPPING = 'DROPPING';
 
-
 // Notify the "scheduler" that the channel _probably_ has some unfinshed
 // work and thus needs a future `run`.
 function kick(ch) {

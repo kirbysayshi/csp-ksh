@@ -48,9 +48,13 @@ test('sliding', function(t) {
   })
 })
 
-/*test('single mapper is ok', function(t) {
-  var ch = chan(2, function(v) {
-    return v + 1;
+test('manual transducer', function(t) {
+  var ch = chan(2, function td(xform) {
+    return {
+      step: function(result, input) {
+        return xform.step(result, input + 1);
+      }
+    }
   });
 
   put(ch, 1);
@@ -69,7 +73,7 @@ test('sliding', function(t) {
     t.equal(v, chan.CLOSED);
     t.end();
   })
-})*/
+})
 
 test('daisy chain', function(t) {
   var ch1 = chan();
