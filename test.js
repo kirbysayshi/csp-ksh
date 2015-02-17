@@ -202,3 +202,21 @@ test('transducers: drop (stateful reduction)', function(t) {
     t.end();
   })
 })
+
+test.only('transducers: take as array, ', function(t) {
+  var ch = chan(1, td.comp(td.take(3), td.partitionAll(3)));
+
+  put(ch, 0)
+  put(ch, 1)
+  put(ch, 2)
+  put(ch, 3)
+
+  take(ch, function(v) {
+    t.deepEqual(v, [0, 1, 2]);
+  })
+
+  take(ch, function(v) {
+    t.equal(v, chan.CLOSED)
+    t.end();
+  })
+})
