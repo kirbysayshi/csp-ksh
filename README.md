@@ -29,7 +29,7 @@ See [test.js](./test.js). Otherwise here's an example of finding the mouse vecto
 
 ```js
 var td = require('transducers-js');
-var csp = require('./');
+var csp = require('csp-ksh');
 var chan = csp.chan;
 var put = csp.put;
 var take = csp.take;
