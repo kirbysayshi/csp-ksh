@@ -48,7 +48,7 @@ test('sliding', function(t) {
   })
 })
 
-test('single mapper is ok', function(t) {
+/*test('single mapper is ok', function(t) {
   var ch = chan(2, function(v) {
     return v + 1;
   });
@@ -69,44 +69,7 @@ test('single mapper is ok', function(t) {
     t.equal(v, chan.CLOSED);
     t.end();
   })
-})
-
-test('mappers return undefined to filter', function(t) {
-  var ch = chan(1, [function(val) {
-    return val + 1;
-  }, function filterEven(val) {
-    return val % 2 === 0
-      ? val
-      : undefined;
-  }]);
-
-  // PUTs are buffered internally, so even though a buffer size of 1 is
-  // specified above, these will all eventually successfully PUT. They are
-  // buffered because the semantics are that they "block", but JS can't really
-  // do that without generators...
-  put(ch, 1, function() {
-    put(ch, 2, function() {
-      put(ch, 3, function() {
-        put(ch, 4, function() {
-          close(ch);
-        });
-      });
-    });
-  });
-
-  take(ch, function(v) {
-    t.equal(v, 2);
-  })
-
-  take(ch, function(v) {
-    t.equal(v, 4);
-  })
-
-  take(ch, function(v) {
-    t.equal(v, chan.CLOSED);
-    t.end();
-  })
-})
+})*/
 
 test('daisy chain', function(t) {
   var ch1 = chan();
@@ -128,8 +91,8 @@ test('daisy chain', function(t) {
   put(ch1, 'chain of fools');
 })
 
-test('closed fulfills with CLOSED, throws on put', function(t) {
-  t.plan(3);
+test('closed fulfills with CLOSED', function(t) {
+  t.plan(2);
 
   var ch = chan();
 
@@ -142,8 +105,96 @@ test('closed fulfills with CLOSED, throws on put', function(t) {
   });
 
   close(ch);
+})
 
-  t.throws(function() {
-    put(ch, 'heyo');
+test('transducers: map(normal reduction)', function(t) {
+  t.plan(6)
+  var ch = chan(3, td.map(inc));
+
+  for (var i = 0; i < 6; i++) {
+    put(ch, i);
+  }
+
+  for (var i = 0; i < 6; i++) {
+    (function(i) {
+      take(ch, function(v) {
+        t.equal(v, inc(i))
+        if (i == 5) t.end();
+      })
+    }(i))
+  }
+
+  function inc(x) { return x + 1; }
+})
+
+test('transducers: filter(input-suppressing reduction)', function(t) {
+  var ch = chan(3, td.filter(even));
+
+  put(ch, 0)
+  put(ch, 1)
+  put(ch, 2)
+  put(ch, 3)
+  put(ch, 4)
+  put(ch, 5)
+
+  take(ch, function(v) {
+    t.equal(v, 0)
+  })
+
+  take(ch, function(v) {
+    t.equal(v, 2)
+  })
+
+  take(ch, function(v) {
+    t.equal(v, 4)
+    t.end();
+  })
+
+  function even(x) { return x % 2 === 0; }
+})
+
+test('transducers: take(terminating reduction)', function(t) {
+  t.plan(4);
+  var ch = chan(1, td.take(3));
+
+  put(ch, 0)
+  put(ch, 1)
+  put(ch, 2)
+  put(ch, 3)
+
+  take(ch, function(v) {
+    t.equal(v, 0)
+  })
+
+  take(ch, function(v) {
+    t.equal(v, 1)
+  })
+
+  take(ch, function(v) {
+    t.equal(v, 2)
+  })
+
+  take(ch, function(v) {
+    t.equal(v, chan.CLOSED)
+    t.end();
+  })
+})
+
+test('transducers: drop (stateful reduction)', function(t) {
+  var ch = chan(1, td.drop(3));
+
+  put(ch, 0)
+  put(ch, 1)
+  put(ch, 2)
+  put(ch, 3)
+  put(ch, 4)
+
+  take(ch, function(v) {
+    t.equal(v, 3)
+  })
+
+  take(ch, function(v) {
+    t.equal(v, 4)
+    t.end();
   })
 })

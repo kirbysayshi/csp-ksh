@@ -21,7 +21,8 @@
   },
   "homepage": "https://github.com/kirbysayshi/csp-ksh",
   "devDependencies": {
-    "tape": "^3.5.0"
+    "tape": "^3.5.0",
+    "transducers-js": "^0.4.135"
   },
   "dependencies": {
     "debug": "^2.1.1"

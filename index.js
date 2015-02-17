@@ -13,7 +13,11 @@ exports.DROPPING = 'DROPPING';
 // Notify the "scheduler" that the channel _probably_ has some unfinshed
 // work and thus needs a future `run`.
 function kick(ch) {
-  debug('ch:'+ch.id, 'kick');
+  debug('ch:'+ch.id, 'kick',
+      'buf', ch.buf.length,
+      'consumers', ch.consumers.length,
+      'producers', ch.producers.length);
+
   if (
     !ch.kicked
     && (ch.consumers.length || ch.producers.length)
@@ -43,7 +47,8 @@ function run(ch) {
   while(!ch.closed && pss.length) {
     debug('ch:'+ch.id, 'run:producers', pss.length)
     var ps = pss.shift();
-    ps();
+    var ok = ps();
+    debug('ch:'+ch.id, 'run:produced', ok);
   }
 
   var css = ch.consumers.slice();
@@ -51,7 +56,8 @@ function run(ch) {
   while(css.length) {
     debug('ch:'+ch.id, 'run:consumers', css.length)
     var cs = css.shift();
-    cs();
+    var ok = cs();
+    debug('ch:'+ch.id, 'run:consumed', ok);
   }
 }
 
@@ -114,20 +120,10 @@ function close(ch) {
 
 function put(ch, val, cb) {
 
-  if (ch.closed) {
-    throw new Error('Cannot PUT on a closed channel');
-  }
-
-  if (!tryput()) {
-    ch.producers.push(tryput);
-    kick(ch);
-    return false;
-  } else {
-    return true;
-  }
+  return tryput();
 
   function tryput() {
-    debug('ch:'+ch.id, 'tryput', ch.type);
+    debug('ch:'+ch.id, 'tryput', ch.type, 'val', val);
     if (ch.type == 'FIXED') {
       if (ch.buf.length < ch.window) {
         transduce();
@@ -136,6 +132,7 @@ function put(ch, val, cb) {
         return true;
       } else {
         ch.producers.push(tryput);
+        kick(ch);
         return false;
       }
     }
@@ -159,7 +156,14 @@ function put(ch, val, cb) {
   }
 
   function transduce() {
-    ch.transducer.step(ch.buf, val);
+    var reduced = ch.transducer.step(ch.buf, val);
+    debug('ch:' + ch.id, 'transduce:reduced', reduced);
+    if (reduced && reduced.__transducers_reduced__) {
+      // transducer has finished it's reduction, implying this channel should
+      // be considered closed.
+      debug('ch:' + ch.id, 'transduce:closing', ch.buf);
+      close(ch);
+    }
   }
 }
 
@@ -168,25 +172,22 @@ function take(ch, cb) {
   kick(ch);
 
   function trytake() {
+    debug('ch:' + ch.id, 'trytake', ch.buf);
     if (ch.buf.length > 0) {
-      return cb(ch.buf.shift());
+      cb(ch.buf.shift());
+      return true;
     } else if (ch.closed) {
-      return cb(chan.CLOSED);
+      cb(chan.CLOSED);
+      return true;
     } else {
       ch.consumers.push(trytake);
       kick(ch);
+      return false;
     }
   }
 }
 
 function Xform(){}
-
 Xform.prototype.init = function() {}
-
-Xform.prototype.result = function(result) {
-  return result;
-}
-
-Xform.prototype.step = function(result, input) {
-  return result.push(input);
-}
+Xform.prototype.result = function(result) { return result; }
+Xform.prototype.step = function(result, input) { return result.push(input); }
